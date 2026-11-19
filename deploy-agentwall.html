@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Deploy AgentWall</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f4f4f1;
+        --surface: #ffffff;
+        --surface-2: #ececea;
+        --ink: #17181c;
+        --ink-2: #4c4f57;
+        --ink-3: #83868f;
+        --line: #dddcd6;
+        --gold: #c9930a;
+        --gold-strong: #f0b90b;
+        --gold-ink: #1a1405;
+        --ok: #177245;
+        --ok-bg: #e3f2e9;
+        --warn: #9a6206;
+        --warn-bg: #faf0d7;
+        --err: #b3261e;
+        --err-bg: #fbe7e5;
+        --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0c0e12;
+          --surface: #15181f;
+          --surface-2: #1d212b;
+          --ink: #f2f2ee;
+          --ink-2: #b9bcc4;
+          --ink-3: #7e828d;
+          --line: #2a2e39;
+          --gold: #f0b90b;
+          --gold-strong: #f0b90b;
+          --gold-ink: #1a1405;
+          --ok: #4cc38a;
+          --ok-bg: #12291e;
+          --warn: #f5c04e;
+          --warn-bg: #2c230d;
+          --err: #ff8a80;
+          --err-bg: #331714;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      main {
+        max-width: 620px;
+        margin: 0 auto;
+        padding: 20px 16px 56px;
+      }
+      h1 {
+        font-size: 27px;
+        line-height: 1.2;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 6px 0 8px;
+      }
+      .lede { color: var(--ink-2); margin: 0 0 20px; font-size: 16px; }
+      .lede strong { color: var(--ink); }
+
+      /* ---------- fact strip ---------- */
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        overflow: hidden;
+        margin-bottom: 22px;
+      }
+      .fact { padding: 12px 12px 10px; }
+      .fact + .fact { border-left: 1px solid var(--line); }
+      .fact .k { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+      .fact .v { font-size: 17px; font-weight: 800; margin-top: 2px; }
+      .fact .s { font-size: 12px; color: var(--ink-2); }
+
+      /* ---------- steps ---------- */
+      .step {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+      .step-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+      .step-num {
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--gold-ink);
+        background: var(--gold-strong);
+        border-radius: 6px;
+        padding: 2px 8px;
+        flex: none;
+        transform: translateY(-1px);
+      }
+      .step h2 { font-size: 18px; font-weight: 800; margin: 0; letter-spacing: -0.01em; }
+      .step p { color: var(--ink-2); margin: 4px 0 14px; font-size: 15px; }
+      .step p:last-child { margin-bottom: 0; }
+
+      button {
+        font-family: var(--sans);
+        font-size: 16px;
+        font-weight: 800;
+        border: 0;
+        border-radius: 10px;
+        min-height: 52px;
+        padding: 12px 20px;
+        cursor: pointer;
+        width: 100%;
+      }
+      button:disabled { cursor: not-allowed; opacity: 0.45; }
+      .btn-gold { background: var(--gold-strong); color: var(--gold-ink); }
+      .btn-gold:active:not(:disabled) { filter: brightness(0.94); }
+      .btn-ghost {
+        background: var(--surface-2);
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+      .btn-small { min-height: 44px; font-size: 14px; padding: 8px 14px; width: auto; }
+
+      /* ---------- wallet rows ---------- */
+      .rows { margin: 0 0 14px; }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 14px;
+        padding: 9px 0;
+        border-bottom: 1px dashed var(--line);
+      }
+      .row:last-child { border-bottom: 0; }
+      .row .k { color: var(--ink-3); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; flex: none; }
+      .row .v { font-weight: 700; text-align: right; }
+      .mono { font-family: var(--mono); font-size: 13.5px; font-weight: 500; word-break: break-all; }
+      .badge {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 800;
+        border-radius: 999px;
+        padding: 2px 10px;
+      }
+      .badge-ok { background: var(--ok-bg); color: var(--ok); }
+      .badge-warn { background: var(--warn-bg); color: var(--warn); }
+      .badge-err { background: var(--err-bg); color: var(--err); }
+
+      /* ---------- checklist ---------- */
+      .checks { list-style: none; margin: 0 0 16px; padding: 0; }
+      .checks li {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 7px 0;
+        font-size: 15px;
+        color: var(--ink-2);
+      }
+      .checks .dot {
+        flex: none;
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        border: 2px solid var(--line);
+        display: grid; place-items: center;
+        font-size: 13px; font-weight: 800;
+        margin-top: 1px;
+        color: transparent;
+      }
+      .checks li.done { color: var(--ink); }
+      .checks li.done .dot { background: var(--ok); border-color: var(--ok); color: #fff; }
+      .checks li.fail { color: var(--ink); }
+      .checks li.fail .dot { background: var(--err); border-color: var(--err); color: #fff; }
+
+      /* ---------- banners ---------- */
+      .banner {
+        border-radius: 10px;
+        padding: 13px 15px;
+        font-size: 15px;
+        margin-bottom: 14px;
+        display: none;
+      }
+      .banner.show { display: block; }
+      .banner-err { background: var(--err-bg); color: var(--err); }
+      .banner-warn { background: var(--warn-bg); color: var(--warn); }
+      .banner p { margin: 0; color: inherit; }
+      .banner strong { display: block; margin-bottom: 2px; }
+      .banner .howto { margin: 6px 0 0; padding-left: 20px; }
+      .banner .howto li { margin: 5px 0; }
+      .diag {
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1.5;
+        background: var(--surface-2);
+        color: var(--ink-2);
+        border-radius: 8px;
+        padding: 9px 11px;
+        margin-top: 12px;
+        word-break: break-word;
+      }
+
+      /* ---------- result ---------- */
+      .result {
+        border: 2px solid var(--ok);
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 20px 18px;
+        margin-bottom: 14px;
+        display: none;
+      }
+      .result.show { display: block; }
+      .result h2 { margin: 0 0 4px; font-size: 19px; font-weight: 800; }
+      .result .addr {
+        font-family: var(--mono);
+        font-size: 17px;
+        font-weight: 600;
+        word-break: break-all;
+        background: var(--ok-bg);
+        border-radius: 8px;
+        padding: 12px;
+        margin: 12px 0;
+        line-height: 1.5;
+      }
+      .result-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+      .result-actions .btn-small { flex: 1 1 150px; text-align: center; }
+      a.btn-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 14px;
+        border-radius: 10px;
+        min-height: 44px;
+        padding: 8px 14px;
+        background: var(--surface-2);
+        color: var(--ink);
+        border: 1px solid var(--line);
+        flex: 1 1 150px;
+      }
+      .txline { font-size: 14px; color: var(--ink-2); margin-top: 12px; }
+      .txline a { color: var(--gold); font-weight: 700; }
+
+      .spinner {
+        display: inline-block;
+        width: 16px; height: 16px;
+        border: 2.5px solid currentColor;
+        border-top-color: transparent;
+        border-radius: 50%;
+        vertical-align: -3px;
+        margin-right: 8px;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        .spinner { animation: none; }
+      }
+
+      /* ---------- details / security ---------- */
+      details {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 4px 18px;
+        margin-bottom: 14px;
+      }
+      summary {
+        font-weight: 800;
+        font-size: 15px;
+        padding: 12px 0;
+        cursor: pointer;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+      }
+      details .rows { margin-bottom: 12px; }
+      .security {
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--gold-strong);
+        border-radius: 10px;
+        background: var(--surface);
+        padding: 14px 16px;
+        font-size: 14.5px;
+        color: var(--ink-2);
+      }
+      .security strong { color: var(--ink); display: block; margin-bottom: 4px; font-size: 15px; }
+      .security p { margin: 0; }
+      .or-divider {
+        display: flex; align-items: center; gap: 12px;
+        margin: 18px 0 14px;
+        color: var(--ink-3); font-size: 12px; font-weight: 700;
+        letter-spacing: 0.08em; text-transform: uppercase;
+      }
+      .or-divider::before, .or-divider::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+      .wc-note { font-size: 14px; color: var(--ink-2); margin: 10px 0 0; }
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Deploy AgentWall ke BNB Smart Chain</h1>
+      <p class="lede">
+        Satu ketuk dari wallet kamu sendiri. Halaman ini menyiapkan <strong>satu transaksi
+        pembuatan kontrak</strong> — kamu menghubungkan wallet lewat <strong>WalletConnect</strong>
+        dari browser biasa, lalu menekan deploy dan mengonfirmasi di aplikasi Binance.
+        Tidak ada perantara, tidak ada kunci yang diminta.
+      </p>
+
+      <div class="facts" aria-label="Ringkasan deploy">
+        <div class="fact">
+          <div class="k">Perkiraan biaya</div>
+          <div class="v">0,0000355 BNB</div>
+          <div class="s">± $0,02 · gas 710.732</div>
+        </div>
+        <div class="fact">
+          <div class="k">Jaringan</div>
+          <div class="v">BSC Mainnet</div>
+          <div class="s">Chain ID 56</div>
+        </div>
+        <div class="fact">
+          <div class="k">Uji kontrak</div>
+          <div class="v">14/14 lolos</div>
+          <div class="s">Tanpa owner · tanpa fee</div>
+        </div>
+      </div>
+
+      <div class="banner banner-warn" id="noWallet">
+        <strong>Wallet tersuntik belum terdeteksi — tidak apa-apa.</strong>
+        <p id="detectStatus">Mencari wallet yang disuntikkan browser…</p>
+        <p style="margin-top:8px">Jalur utama halaman ini sekarang <b>WalletConnect</b> (tombol emas di Langkah 1):
+        buka halaman ini dari Chrome biasa, hubungkan, lalu setujui di aplikasi Binance. Jalur itu <b>tidak butuh</b>
+        wallet terdeteksi di halaman ini. Kotak ini hanya soal jalur cadangan — wallet yang disuntikkan browser dApp —
+        dan halaman ini tetap mengecek ulang sendiri tiap 2 detik.</p>
+        <p id="iframeNote" class="hidden" style="margin-top:8px">Catatan: halaman ini sedang tampil di dalam bingkai
+        (iframe) aplikasi lain. Wallet Binance hanya menyuntik ke halaman utama, jadi jalur cadangan tidak akan terbaca
+        selama halaman masih tertanam di bingkai. Pakai WalletConnect saja — atau, kalau mau mencoba jalur cadangan,
+        buka halaman ini sebagai halaman utama lewat tombol di bawah.</p>
+        <div id="escapeBlock">
+        <p style="margin-top:10px"><a class="btn-link" id="openDirectBtn" href="#" target="_top">Buka halaman ini sebagai halaman utama ↗</a></p>
+        </div>
+        <div class="diag" id="diagBox">Hasil cek: …</div>
+        <p style="margin-top:10px"><button class="btn-ghost btn-small" id="retryDetectBtn">Cari wallet lagi</button></p>
+      </div>
+
+      <div class="banner banner-err" id="errorBox" role="alert">
+        <strong id="errorTitle">Ada yang gagal.</strong>
+        <p id="errorText"></p>
+      </div>
+
+      <!-- STEP 1 -->
+      <section class="step" id="step1">
+        <div class="step-head"><span class="step-num">1</span><h2>Hubungkan wallet</h2></div>
+        <p>Wallet deployer: <span class="mono">0x0760F0556A5D436C372Ee2FAAc32ea8Bcef7F345</span> — saldo terakhir tercek ± 0,000935 BNB, cukup untuk deploy.</p>
+        <button class="btn-gold" id="wcBtn">Hubungkan via WalletConnect</button>
+        <p class="wc-note" id="wcStatus">Cara utama: buka halaman ini dari <b>Chrome biasa</b>, tekan tombol di atas, pilih <b>Binance Wallet</b>, lalu setujui koneksinya di aplikasi Binance. Tidak perlu browser di dalam aplikasi.</p>
+        <div class="or-divider"><span>atau</span></div>
+        <button class="btn-ghost" id="connectBtn">Pakai browser dApp Binance</button>
+        <p class="wc-note">Cara cadangan: wallet yang disuntikkan browser dApp Binance langsung ke halaman ini. Jalur inilah yang kemarin muter terus lalu batal — pakai hanya kalau WalletConnect bermasalah.</p>
+        <div id="walletInfo" class="hidden">
+          <div class="rows">
+            <div class="row"><span class="k">Alamat</span><span class="v mono" id="wAddr">—</span></div>
+            <div class="row"><span class="k">Saldo</span><span class="v" id="wBal">—</span></div>
+            <div class="row"><span class="k">Jaringan</span><span class="v" id="wChain">—</span></div>
+          </div>
+          <div class="banner banner-warn" id="wrongWallet">
+            <strong>Ini bukan wallet deployer.</strong>
+            <p>Kamu terhubung dengan alamat lain. Deploy tetap bisa jalan dari wallet mana pun yang punya BNB,
+            tapi alamat di atas adalah wallet yang memegang Agent ID kamu. Ganti akun di wallet kalau mau pakai yang itu.</p>
+          </div>
+          <div class="banner banner-warn" id="wrongChain">
+            <strong>Jaringan salah.</strong>
+            <p>Kontrak ini harus di-deploy di BNB Smart Chain (Chain ID 56).</p>
+            <p style="margin-top:10px"><button class="btn-ghost btn-small" id="switchBtn">Pindah ke BNB Smart Chain</button></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section class="step" id="step2">
+        <div class="step-head"><span class="step-num">2</span><h2>Cek terakhir, lalu deploy</h2></div>
+        <ul class="checks">
+          <li id="chkWallet"><span class="dot">✓</span><span>Wallet terhubung</span></li>
+          <li id="chkChain"><span class="dot">✓</span><span>Jaringan BNB Smart Chain (Chain ID 56)</span></li>
+          <li id="chkBalance"><span class="dot">✓</span><span>Saldo cukup untuk gas deploy (± 0,0000355 BNB)</span></li>
+        </ul>
+        <p>Transaksi yang dikirim: pembuatan kontrak AgentWall, <b>value 0 BNB</b> — satu-satunya biaya adalah gas jaringan.
+        Gate kontrak mengarah ke kontrak Agent ID resmi <span class="mono">0x60b9262456de011f7d15a54cdd8c48baaa8b022f</span> (SPACE ID Agent ID).</p>
+        <button class="btn-gold" id="deployBtn" disabled>Deploy AgentWall</button>
+        <p class="hidden" id="deployStatus" style="margin-top:12px"></p>
+      </section>
+
+      <!-- RESULT -->
+      <section class="result" id="resultBox" aria-live="polite">
+        <h2>AgentWall berhasil di-deploy 🎉</h2>
+        <p style="margin:0;color:var(--ink-2)">Simpan alamat kontrak ini — alamat ini yang diisi ke frontend AgentWall dan form submit hackathon.</p>
+        <div class="addr" id="contractAddr">—</div>
+        <div class="result-actions">
+          <button class="btn-ghost btn-small" id="copyBtn">Salin alamat kontrak</button>
+          <a class="btn-link" id="contractLink" href="#" target="_blank" rel="noopener">Lihat di BscScan ↗</a>
+        </div>
+        <p class="txline">Tx hash: <span class="mono" id="txHashText">—</span><br />
+        <a id="txLink" href="#" target="_blank" rel="noopener">Lihat transaksi di BscScan ↗</a></p>
+        <p class="txline">Langkah berikutnya: verifikasi source code di BscScan (Solidity 0.8.20, optimizer ON, runs 200), lalu isi alamat ini ke <span class="mono">CONTRACT_ADDRESS</span> di frontend.</p>
+      </section>
+
+      <details>
+        <summary>Detail transaksi deploy</summary>
+        <div class="rows">
+          <div class="row"><span class="k">Jenis</span><span class="v">Contract creation</span></div>
+          <div class="row"><span class="k">Value</span><span class="v">0 BNB</span></div>
+          <div class="row"><span class="k">Gas terukur</span><span class="v">710.732</span></div>
+          <div class="row"><span class="k">Creation data</span><span class="v">6.428 karakter (bytecode + argumen)</span></div>
+          <div class="row"><span class="k">Argumen konstruktor</span><span class="v mono">0x60b9262456de011f7d15a54cdd8c48baaa8b022f</span></div>
+          <div class="row"><span class="k">Kontrak</span><span class="v">AgentWall — guestbook + check-in harian, khusus pemegang Agent ID. Tanpa owner, tanpa fungsi admin, tanpa fee.</span></div>
+        </div>
+      </details>
+
+      <div class="security">
+        <strong>Soal keamanan</strong>
+        <p>Halaman ini tidak pernah — dan tidak akan pernah — meminta seed phrase, private key, atau kode pairing.
+        Ia hanya menyiapkan transaksi; <b>kamu sendiri</b> yang meninjau dan mengonfirmasi di wallet kamu.
+        Kalau ada halaman atau orang yang meminta kunci dengan mengatasnamakan deploy ini, itu penipuan.</p>
+      </div>
+    </main>
+
+    <script>
+      // Creation data AgentWall (bytecode + constructor arg ABI-encoded).
+      // Argumen konstruktor di ekor data = alamat Agent ID resmi
+      // 0x60b9262456de011f7d15a54cdd8c48baaa8b022f. JANGAN diubah.
+      var CREATION_DATA = "0x60a060405234801561000f575f80fd5b50604051610c6d380380610c6d83398101604081905261002e9161003f565b6001600160a01b031660805261006c565b5f6020828403121561004f575f80fd5b81516001600160a01b0381168114610065575f80fd5b9392505050565b608051610bdb6100925f395f81816102020152818161023b01526105560152610bdb5ff3fe608060405234801561000f575f80fd5b50600436106100cb575f3560e01c806379d6348d11610088578063c483da2211610063578063c483da22146101c2578063c792f36d146101e1578063e24052e2146101f4578063e84f43b7146101fd575f80fd5b806379d6348d1461018757806379fd93651461019a578063a563eaa3146101b9575f80fd5b8063183ff085146100cf5780632079fb9a146100d9578063277fc0e9146101095780633015a5211461012a5780633504f52b1461013c5780635eeadb0d1461015f575b5f80fd5b6100d7610224565b005b6100ec6100e73660046108a0565b61042f565b6040516001600160a01b0390911681526020015b60405180910390f35b61011c6101173660046108b7565b610457565b6040516101009291906108e4565b6001545b604051908152602001610100565b61014f61014a3660046108b7565b61050f565b6040519015158152602001610100565b61012e61016d3660046108b7565b6001600160a01b03165f9081526003602052604090205490565b6100d7610195366004610936565b61053f565b61012e6101a83660046108b7565b60036020525f908152604090205481565b61012e60045481565b61012e6101d03660046108b7565b60026020525f908152604090205481565b61011c6101ef3660046108b7565b6107ff565b61012e61011881565b6100ec7f000000000000000000000000000000000000000000000000000000000000000081565b6040516370a0823160e01b81523360048201525f907f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906370a0823190602401602060405180830381865afa158015610288573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906102ac91906109a2565b116102f95760405162461bcd60e51b81526020600482015260186024820152771059d95b9d15d85b1b0e881b995959081059d95b9d08125160421b60448201526064015b60405180910390fd5b5f61030762015180426109cd565b335f908152600260205260409020549091508190036103745760405162461bcd60e51b815260206004820152602360248201527f4167656e7457616c6c3a20616c726561647920636865636b656420696e20746f60448201526264617960e81b60648201526084016102f0565b5f6103806001836109ec565b335f908152600260205260409020541461039b5760016103b5565b335f908152600360205260409020546103b5906001610a05565b335f90815260036020908152604080832084905560029091528120849055600480549293506001929091906103eb908490610a05565b9091555050604080518281526020810184905233917f621d62c6c0c4a0c35e883c6b27ad50ecc3093f08bfaf8aa5f58127d351feeb21910160405180910390a25050565b6001818154811061043e575f80fd5b5f918252602090912001546001600160a01b0316905081565b6001600160a01b0381165f9081526020819052604081206001810154815460609392918291829061048790610a18565b80601f01602080910402602001604051908101604052809291908181526020018280546104b390610a18565b80156104fe5780601f106104d5576101008083540402835291602001916104fe565b820191905f5260205f20905b8154815290600101906020018083116104e157829003601f168201915b505050505091509250925050915091565b5f61051d62015180426109cd565b6001600160a01b039092165f9081526002602052604090205491909114919050565b6040516370a0823160e01b81523360048201525f907f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906370a0823190602401602060405180830381865afa1580156105a3573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906105c791906109a2565b1161060f5760405162461bcd60e51b81526020600482015260186024820152771059d95b9d15d85b1b0e881b995959081059d95b9d08125160421b60448201526064016102f0565b5f82828080601f0160208091040260200160405190810160405280939291908181526020018383808284375f9201919091525050825192935050506106965760405162461bcd60e51b815260206004820152601860248201527f4167656e7457616c6c3a20656d707479206d657373616765000000000000000060448201526064016102f0565b610118815111156106e95760405162461bcd60e51b815260206004820152601b60248201527f4167656e7457616c6c3a206d65737361676520746f6f206c6f6e67000000000060448201526064016102f0565b335f908152602081905260409020805461070290610a18565b90505f0361074b576001805480820182555f919091527fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf60180546001600160a01b031916331790555b6040805160606020601f860181900402820181018352918101848152909182919086908690819085018382808284375f920182905250938552505042602093840152503381529081905260409020815181906107a79082610ab2565b5060208201518160010155905050336001600160a01b03167f5a9f0eb066d7285e65f49b8f2846ffbdb80ccfed2693314ebcf5851f5be873d98484426040516107f293929190610b6e565b60405180910390a2505050565b5f6020819052908152604090208054819061081990610a18565b80601f016020809104026020016040519081016040528092919081815260200182805461084590610a18565b80156108905780601f1061086757610100808354040283529160200191610890565b820191905f5260205f20905b81548152906001019060200180831161087357829003601f168201915b5050505050908060010154905082565b5f602082840312156108b0575f80fd5b5035919050565b5f602082840312156108c7575f80fd5b81356001600160a01b03811681146108dd575f80fd5b9392505050565b604081525f83518060408401525f5b8181101561091057602081870181015160608684010152016108f3565b505f606082850101526060601f19601f8301168401019150508260208301529392505050565b5f8060208385031215610947575f80fd5b823567ffffffffffffffff8082111561095e575f80fd5b818501915085601f830112610971575f80fd5b81358181111561097f575f80fd5b866020828501011115610990575f80fd5b60209290920196919550909350505050565b5f602082840312156109b2575f80fd5b5051919050565b634e487b7160e01b5f52601160045260245ffd5b5f826109e757634e487b7160e01b5f52601260045260245ffd5b500490565b818103818111156109ff576109ff6109b9565b92915050565b808201808211156109ff576109ff6109b9565b600181811c90821680610a2c57607f821691505b602082108103610a4a57634e487b7160e01b5f52602260045260245ffd5b50919050565b634e487b7160e01b5f52604160045260245ffd5b601f821115610aad575f81815260208120601f850160051c81016020861015610a8a5750805b601f850160051c820191505b81811015610aa957828155600101610a96565b5050505b505050565b815167ffffffffffffffff811115610acc57610acc610a50565b610ae081610ada8454610a18565b84610a64565b602080601f831160018114610b13575f8415610afc5750858301515b5f19600386901b1c1916600185901b178555610aa9565b5f85815260208120601f198616915b82811015610b4157888601518255948401946001909101908401610b22565b5085821015610b5e57878501515f19600388901b60f8161c191681555b5050505050600190811b01905550565b60408152826040820152828460608301375f606084830101525f6060601f19601f860116830101905082602083015294935050505056fea2646970667358221220d57636e47cccbfb659b5573324c8a0598158487f4de3abe1ad04d90853427d2864736f6c6343000814003300000000000000000000000060b9262456de011f7d15a54cdd8c48baaa8b022f";
+
+      var EXPECTED_WALLET = "0x0760F0556A5D436C372Ee2FAAc32ea8Bcef7F345";
+      var BSC_CHAIN_ID = 56n;
+      var ESTIMATED_COST_WEI = 35540000000000n; // 0,00003554 BNB @ gas 0,05 gwei
+
+      var injected = null;   // provider wallet (EIP-1193) yang terdeteksi
+      var eip6963Providers = [];
+      var account = null;
+      var deploying = false;
+
+      // ---------- WalletConnect (jalur utama) ----------
+      // Provider-nya dimuat oleh script UMD WalletConnect di akhir halaman
+      // dan diserahkan ke sini lewat window.__awSetWcProvider. activeProvider
+      // menunjuk provider yang sedang dipakai (WalletConnect atau suntikan),
+      // supaya cek saldo/jaringan dan deploy memakai state yang sama.
+      var wcProvider = null;
+      var wcInitError = null;
+      var wcEventsAttached = false;
+      var activeProvider = null;
+
+      window.__awSetWcProvider = function (client) { wcProvider = client; };
+      window.__awWcError = function (e) {
+        wcInitError = e;
+        var note = document.getElementById("wcStatus");
+        if (note) note.textContent = "WalletConnect gagal dimuat dari CDN — periksa koneksi lalu muat ulang halaman ini. Jalur cadangan browser dApp Binance di bawah tetap bisa dicoba.";
+      };
+
+      function activeProv() { return activeProvider || injected; }
+
+      var $ = function (id) { return document.getElementById(id); };
+
+      // ---------- deteksi provider wallet ----------
+      // Browser dApp (termasuk Binance) menyuntikkan provider SETELAH halaman
+      // mulai dimuat, dan tiap wallet beda caranya: window.ethereum,
+      // window.BinanceChain (khusus Binance), atau pengumuman EIP-6963.
+      // Karena itu deteksi di sini tidak pernah menyerah di percobaan pertama,
+      // dan tombol Hubungkan tidak pernah dimatikan permanen.
+      function isUsableProvider(p) {
+        return !!p && (typeof p.request === "function" || typeof p.enable === "function" || typeof p.sendAsync === "function");
+      }
+
+      function inIframe() {
+        try { return window.self !== window.top; } catch (e) { return true; }
+      }
+
+      // Provider Binance versi lama kadang tidak punya .request (EIP-1193),
+      // hanya .enable() / .sendAsync(). Bungkus jadi antarmuka request()
+      // supaya sisa kode tidak perlu tahu bedanya.
+      function wrapLegacyProvider(p) {
+        if (typeof p.request === "function") return p;
+        if (p.__awWrap) return p.__awWrap;
+        var wrapped = { __raw: p };
+        wrapped.request = function (args) {
+          if (args.method === "eth_requestAccounts" && typeof p.enable === "function") {
+            return Promise.resolve(p.enable()).then(function (accounts) {
+              if (accounts && accounts.length) return accounts;
+              return wrapped.request({ method: "eth_accounts", params: [] });
+            });
+          }
+          if (typeof p.sendAsync === "function") {
+            return new Promise(function (resolve, reject) {
+              p.sendAsync({ method: args.method, params: args.params || [] }, function (err, res) {
+                if (err) reject(err);
+                else resolve(res ? res.result : null);
+              });
+            });
+          }
+          if (typeof p.send === "function") {
+            return new Promise(function (resolve, reject) {
+              p.send(args.method, args.params || [], function (err, res) {
+                if (err) reject(err);
+                else resolve(res && res.result !== undefined ? res.result : res);
+              });
+            });
+          }
+          return Promise.reject(new Error("Provider wallet tidak mendukung metode " + args.method));
+        };
+        if (typeof p.on === "function") {
+          wrapped.on = function (ev, cb) { return p.on(ev, cb); };
+        }
+        try { p.__awWrap = wrapped; } catch (e) {}
+        return wrapped;
+      }
+
+      function noteProvider(p) {
+        if (!isUsableProvider(p)) return;
+        var usable = wrapLegacyProvider(p);
+        if (!injected) {
+          injected = usable;
+          attachProviderEvents(usable);
+        }
+        if (p.isBinance || p.isBinanceWallet) injected = usable;
+        $("noWallet").classList.remove("show");
+        $("connectBtn").disabled = false;
+        updateDiag();
+      }
+
+      // Semua tempat wallet biasa menyuntikkan provider-nya. Binance Web3
+      // Wallet bisa muncul sebagai window.ethereum, window.BinanceChain,
+      // atau window.binancew3w; wallet lain (Trust, TokenPocket) juga dicek.
+      function candidateProviders() {
+        var list = [];
+        function push(p) { if (p && list.indexOf(p) === -1) list.push(p); }
+        try { push(window.ethereum); } catch (e) {}
+        try {
+          if (window.ethereum && Array.isArray(window.ethereum.providers)) {
+            window.ethereum.providers.forEach(push);
+          }
+        } catch (e) {}
+        try { push(window.BinanceChain); } catch (e) {}
+        try { push(window.binancew3w); } catch (e) {}
+        try { if (window.binancew3w) push(window.binancew3w.ethereum); } catch (e) {}
+        try { if (window.trustwallet) push(window.trustwallet.ethereum || window.trustwallet); } catch (e) {}
+        try { if (window.tokenpocket) push(window.tokenpocket.ethereum); } catch (e) {}
+        // Kalau halaman ini tertanam di bingkai aplikasi lain, sebagian
+        // browser wallet menyuntikkan provider ke jendela induk. Coba baca
+        // dari sana; kalau beda origin browser menolaknya — tidak apa-apa,
+        // jalan keluarnya memang membuka halaman ini sebagai halaman utama.
+        try { if (window.parent && window.parent !== window) push(window.parent.ethereum); } catch (e) {}
+        try { if (window.top && window.top !== window) push(window.top.ethereum); } catch (e) {}
+        for (var i = 0; i < eip6963Providers.length; i++) push(eip6963Providers[i]);
+        return list;
+      }
+
+      function updateDiag() {
+        var box = $("diagBox");
+        if (!box) return;
+        function mark(v) { return v ? "ada" : "tidak ada"; }
+        var eth = false, bc = false, w3w = false;
+        try { eth = !!window.ethereum; } catch (e) {}
+        try { bc = !!window.BinanceChain; } catch (e) {}
+        try { w3w = !!window.binancew3w; } catch (e) {}
+        box.textContent =
+          "Hasil cek — posisi halaman: " + (inIframe() ? "di dalam bingkai (iframe)" : "halaman utama") +
+          " · window.ethereum: " + mark(eth) +
+          " · BinanceChain: " + mark(bc) +
+          " · binancew3w: " + mark(w3w) +
+          " · EIP-6963: " + eip6963Providers.length + " wallet" +
+          " · provider terpakai: " + (injected ? "ketemu" : "belum ketemu");
+        var note = $("iframeNote");
+        if (note) note.classList.toggle("hidden", !inIframe());
+        var esc = $("escapeBlock");
+        if (esc) esc.classList.toggle("hidden", !inIframe());
+      }
+
+      function detectProviders() {
+        var list = candidateProviders();
+        for (var i = 0; i < list.length; i++) noteProvider(list[i]);
+        try { window.dispatchEvent(new Event("eip6963:requestProvider")); } catch (e) {}
+        updateDiag();
+        return injected;
+      }
+
+      function waitForProvider(timeoutMs) {
+        if (detectProviders()) return Promise.resolve(injected);
+        return new Promise(function (resolve) {
+          var started = Date.now();
+          var timer = setInterval(function () {
+            if (detectProviders() || Date.now() - started >= timeoutMs) {
+              clearInterval(timer);
+              resolve(injected);
+            }
+          }, 250);
+        });
+      }
+
+      window.addEventListener("eip6963:announceProvider", function (ev) {
+        if (ev.detail && ev.detail.provider) {
+          eip6963Providers.push(ev.detail.provider);
+          noteProvider(ev.detail.provider);
+        }
+      });
+      window.addEventListener("ethereum#initialized", detectProviders);
+
+      function attachProviderEvents(p) {
+        if (typeof p.on !== "function") return;
+        p.on("accountsChanged", function (accounts) {
+          if (!accounts || accounts.length === 0) {
+            account = null;
+            if (activeProvider === p) activeProvider = null;
+            $("walletInfo").classList.add("hidden");
+            $("connectBtn").textContent = "Pakai browser dApp Binance";
+            $("wcBtn").textContent = "Hubungkan via WalletConnect";
+            setCheck("chkWallet", "");
+            setCheck("chkChain", "");
+            setCheck("chkBalance", "");
+            refreshDeployButton(false);
+          } else {
+            account = accounts[0];
+            activeProvider = p;
+            $("connectBtn").textContent = "Terhubung: " + shortAddr(account);
+            $("walletInfo").classList.remove("hidden");
+            refreshWallet();
+          }
+        });
+        p.on("chainChanged", function () { refreshWallet(); });
+      }
+
+      // ---------- helper JSON-RPC mentah (tanpa library eksternal) ----------
+      function rpc(method, params) {
+        return activeProv().request({ method: method, params: params || [] });
+      }
+
+      function toBigInt(v) {
+        if (typeof v === "bigint") return v;
+        if (typeof v === "number") return BigInt(Math.trunc(v));
+        return BigInt(v);
+      }
+
+      function formatBNB(wei) {
+        var whole = wei / 1000000000000000000n;
+        var frac = wei % 1000000000000000000n;
+        var fracStr = frac.toString().padStart(18, "0").slice(0, 6);
+        return whole.toString() + "." + fracStr;
+      }
+
+      function sleep(ms) {
+        return new Promise(function (r) { setTimeout(r, ms); });
+      }
+
+      function showError(title, text) {
+        $("errorTitle").textContent = title;
+        $("errorText").textContent = text;
+        $("errorBox").classList.add("show");
+        $("errorBox").scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      function hideError() { $("errorBox").classList.remove("show"); }
+
+      function setCheck(id, state) {
+        var li = $(id);
+        li.classList.remove("done", "fail");
+        if (state) li.classList.add(state);
+        li.querySelector(".dot").textContent = state === "fail" ? "✕" : "✓";
+      }
+
+      function shortAddr(a) {
+        return a ? a.slice(0, 6) + "…" + a.slice(-4) : "—";
+      }
+
+      function refreshDeployButton(chainOk) {
+        $("deployBtn").disabled = !(account && chainOk && !deploying);
+      }
+
+      async function refreshWallet() {
+        if (!activeProv() || !account) return;
+        try {
+          var chainId = toBigInt(await rpc("eth_chainId"));
+          var balance = toBigInt(await rpc("eth_getBalance", [account, "latest"]));
+          var chainOk = chainId === BSC_CHAIN_ID;
+
+          $("wAddr").textContent = account;
+          $("wBal").textContent = formatBNB(balance) + " BNB";
+          $("wChain").innerHTML = chainOk
+            ? 'BNB Smart Chain (56) <span class="badge badge-ok">Benar</span>'
+            : 'Chain ID ' + chainId.toString() + ' <span class="badge badge-err">Salah jaringan</span>';
+
+          $("wrongChain").classList.toggle("show", !chainOk);
+          $("wrongWallet").classList.toggle(
+            "show",
+            account.toLowerCase() !== EXPECTED_WALLET.toLowerCase()
+          );
+
+          setCheck("chkWallet", "done");
+          setCheck("chkChain", chainOk ? "done" : "fail");
+          setCheck("chkBalance", balance >= ESTIMATED_COST_WEI ? "done" : "fail");
+          refreshDeployButton(chainOk);
+        } catch (e) {
+          // diamkan; user bisa coba hubungkan ulang
+        }
+      }
+
+      async function connect() {
+        hideError();
+        var btn = $("connectBtn");
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Mencari wallet…';
+        // Provider sering disuntikkan beberapa detik setelah halaman tampil;
+        // tunggu dulu sebelum menyimpulkan tidak ada wallet.
+        var found = await waitForProvider(10000);
+        btn.disabled = false;
+        if (!found) {
+          btn.textContent = "Pakai browser dApp Binance";
+          $("detectStatus").textContent = inIframe()
+            ? "Dicari 10 detik — tetap tidak ada wallet tersuntik. Wajar: halaman ini masih di dalam bingkai aplikasi lain, dan wallet Binance tidak menyuntik ke dalam bingkai. Tidak masalah — jalur utama WalletConnect (tombol emas di Langkah 1) tidak butuh suntikan sama sekali."
+            : "Dicari 10 detik — belum ada wallet yang menyuntikkan diri ke halaman ini. Tidak masalah — pakai jalur utama WalletConnect (tombol emas di Langkah 1) dari browser biasa. Jalur suntikan ini hanya jalan dari browser dApp Binance.";
+          $("noWallet").classList.add("show");
+          $("noWallet").scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        try {
+          activeProvider = injected;
+          var accounts = await rpc("eth_requestAccounts");
+          if (!accounts || accounts.length === 0) {
+            btn.textContent = "Pakai browser dApp Binance";
+            showError("Wallet belum membagikan alamat.", "Permintaan koneksi selesai tapi wallet tidak memberikan alamat. Buka aplikasi Binance, pastikan Web3 Wallet aktif, lalu coba lagi — atau pakai WalletConnect.");
+            return;
+          }
+          account = accounts[0];
+          btn.textContent = "Terhubung: " + shortAddr(account);
+          $("walletInfo").classList.remove("hidden");
+          await refreshWallet();
+        } catch (e) {
+          if (activeProvider === injected && !account) activeProvider = wcProvider || null;
+          btn.textContent = "Pakai browser dApp Binance";
+          showError("Gagal menghubungkan wallet.", friendlyError(e));
+        }
+      }
+
+      // ---------- koneksi WalletConnect (jalur utama) ----------
+      function resetConnectionUI() {
+        account = null;
+        activeProvider = null;
+        $("walletInfo").classList.add("hidden");
+        $("wcBtn").textContent = "Hubungkan via WalletConnect";
+        $("connectBtn").textContent = "Pakai browser dApp Binance";
+        setCheck("chkWallet", "");
+        setCheck("chkChain", "");
+        setCheck("chkBalance", "");
+        refreshDeployButton(false);
+      }
+
+      async function wcConnect() {
+        hideError();
+        var btn = $("wcBtn");
+        if (!wcProvider) {
+          if (wcInitError) {
+            showError("WalletConnect gagal dimuat.", "Library WalletConnect tidak berhasil dimuat dari CDN. Periksa koneksi internet, lalu muat ulang halaman ini. Jalur cadangan browser dApp Binance tetap bisa dicoba.");
+            return;
+          }
+          btn.disabled = true;
+          btn.innerHTML = '<span class="spinner"></span>Memuat WalletConnect…';
+          var waited = 0;
+          while (!wcProvider && !wcInitError && waited < 20000) {
+            await sleep(400);
+            waited += 400;
+          }
+          btn.disabled = false;
+          btn.textContent = "Hubungkan via WalletConnect";
+          if (!wcProvider) {
+            showError("WalletConnect belum siap.", wcInitError
+              ? "Library WalletConnect gagal dimuat dari CDN. Periksa koneksi internet, lalu muat ulang halaman ini."
+              : "Library WalletConnect belum selesai dimuat. Tunggu sebentar lalu tekan tombolnya lagi, atau muat ulang halaman ini.");
+            return;
+          }
+        }
+        try {
+          btn.disabled = true;
+          btn.innerHTML = '<span class="spinner"></span>Membuka WalletConnect…';
+          // enable() membuka modal WalletConnect (daftar wallet / QR),
+          // membuat sesi, dan mengembalikan daftar akun yang terhubung.
+          var accounts = await wcProvider.enable();
+          if ((!accounts || accounts.length === 0) && wcProvider.accounts && wcProvider.accounts.length) {
+            accounts = wcProvider.accounts;
+          }
+          btn.disabled = false;
+          if (!accounts || accounts.length === 0) {
+            btn.textContent = "Hubungkan via WalletConnect";
+            showError("WalletConnect belum membagikan alamat.", "Koneksi selesai tapi tidak ada alamat yang diberikan. Coba lagi dan setujui permintaan koneksi di aplikasi Binance.");
+            return;
+          }
+          account = accounts[0];
+          activeProvider = wcProvider;
+          if (!wcEventsAttached && typeof wcProvider.on === "function") {
+            wcEventsAttached = true;
+            attachProviderEvents(wcProvider);
+            wcProvider.on("session_delete", resetConnectionUI);
+            wcProvider.on("disconnect", resetConnectionUI);
+          }
+          btn.textContent = "Terhubung via WalletConnect: " + shortAddr(account);
+          $("walletInfo").classList.remove("hidden");
+          await refreshWallet();
+        } catch (e) {
+          btn.disabled = false;
+          btn.textContent = "Hubungkan via WalletConnect";
+          showError("Gagal menghubungkan via WalletConnect.", friendlyError(e));
+        }
+      }
+
+      async function switchChain() {
+        hideError();
+        if (!activeProv()) {
+          await connect();
+          if (!activeProv()) return;
+        }
+        try {
+          await rpc("wallet_switchEthereumChain", [{ chainId: "0x38" }]);
+        } catch (e) {
+          if (e && e.code === 4902) {
+            try {
+              await rpc("wallet_addEthereumChain", [{
+                chainId: "0x38",
+                chainName: "BNB Smart Chain",
+                nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+                rpcUrls: ["https://bsc-dataseed.binance.org"],
+                blockExplorerUrls: ["https://bscscan.com"]
+              }]);
+            } catch (e2) {
+              showError("Gagal menambah jaringan BSC.", friendlyError(e2));
+              return;
+            }
+          } else {
+            showError("Gagal pindah jaringan.", friendlyError(e));
+            return;
+          }
+        }
+        await refreshWallet();
+      }
+
+      function friendlyError(e) {
+        if (!e) return "Terjadi kesalahan yang tidak dikenal.";
+        if (e.code === 4001 || e.code === "ACTION_REJECTED") {
+          return "Kamu membatalkan permintaan di wallet. Tidak ada transaksi yang terkirim — coba lagi kapan pun siap.";
+        }
+        if (e.code === -32002) {
+          return "Ada permintaan koneksi yang masih menggantung di wallet. Buka aplikasi Binance, selesaikan (atau batalkan) permintaan itu, lalu kembali ke sini dan tekan Hubungkan Wallet lagi.";
+        }
+        var msg = e.shortMessage || e.message || String(e);
+        if (/insufficient funds/i.test(msg)) {
+          return "Saldo BNB tidak cukup untuk membayar gas. Top up sedikit BNB ke wallet ini, lalu coba lagi.";
+        }
+        return msg;
+      }
+
+      async function deploy() {
+        if (!activeProv() || !account || deploying) return;
+        hideError();
+        deploying = true;
+        var btn = $("deployBtn");
+        var status = $("deployStatus");
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Menyiapkan transaksi…';
+        status.classList.remove("hidden");
+        status.textContent = "Permintaan terkirim ke wallet kamu — buka aplikasi Binance dan konfirmasi transaksinya di sana.";
+
+        var txHash = null;
+        try {
+          txHash = await rpc("eth_sendTransaction", [{
+            from: account,
+            data: CREATION_DATA,
+            value: "0x0"
+          }]);
+          btn.innerHTML = '<span class="spinner"></span>Transaksi terkirim — menunggu konfirmasi…';
+          status.innerHTML = 'Tx terkirim: <span class="mono">' + txHash + '</span>. Menunggu masuk blok…';
+
+          var receipt = null;
+          for (var i = 0; i < 40 && !receipt; i++) {
+            await sleep(3000);
+            try { receipt = await rpc("eth_getTransactionReceipt", [txHash]); } catch (e2) { receipt = null; }
+          }
+          deploying = false;
+
+          if (!receipt) {
+            btn.textContent = "Deploy AgentWall";
+            showError("Transaksi belum terkonfirmasi.", "Tx " + txHash + " sudah terkirim tapi belum ada receipt setelah 2 menit. Cek statusnya di BscScan — kalau statusnya sukses, kontraknya sudah live dan alamat kontraknya ada di halaman transaksi itu.");
+            refreshWallet();
+            return;
+          }
+          if (receipt.status !== "0x1" && receipt.status !== 1) {
+            btn.textContent = "Deploy AgentWall";
+            showError("Transaksi gagal di jaringan.", "Tx " + txHash + " tercatat gagal (status 0). Gas terpotong, tapi kontrak tidak ter-deploy. Cek detailnya di BscScan.");
+            refreshWallet();
+            return;
+          }
+
+          var addr = receipt.contractAddress;
+          btn.textContent = "Sudah ter-deploy ✓";
+          status.textContent = "Selesai. Kontrak AgentWall sekarang live di BNB Smart Chain.";
+
+          $("contractAddr").textContent = addr;
+          $("txHashText").textContent = txHash;
+          $("txLink").href = "https://bscscan.com/tx/" + txHash;
+          $("contractLink").href = "https://bscscan.com/address/" + addr;
+          $("resultBox").classList.add("show");
+          $("resultBox").scrollIntoView({ behavior: "smooth", block: "center" });
+          refreshWallet();
+        } catch (e) {
+          deploying = false;
+          btn.textContent = "Deploy AgentWall";
+          status.classList.add("hidden");
+          refreshWallet();
+          showError(txHash ? "Ada masalah setelah transaksi terkirim." : "Deploy belum terjadi.", friendlyError(e));
+        }
+      }
+
+      async function copyAddress() {
+        var addr = $("contractAddr").textContent;
+        var btn = $("copyBtn");
+        try {
+          await navigator.clipboard.writeText(addr);
+          btn.textContent = "Tersalin ✓";
+        } catch (e) {
+          var ta = document.createElement("textarea");
+          ta.value = addr;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); btn.textContent = "Tersalin ✓"; }
+          catch (e2) { btn.textContent = "Salin manual dari kotak di atas"; }
+          document.body.removeChild(ta);
+        }
+        setTimeout(function () { btn.textContent = "Salin alamat kontrak"; }, 2500);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        $("wcBtn").addEventListener("click", wcConnect);
+        $("connectBtn").addEventListener("click", connect);
+        $("switchBtn").addEventListener("click", switchChain);
+        $("deployBtn").addEventListener("click", deploy);
+        $("copyBtn").addEventListener("click", copyAddress);
+        var retryBtn = $("retryDetectBtn");
+        if (retryBtn) retryBtn.addEventListener("click", connect);
+
+        // Tautan keluar bingkai (#openDirectBtn) adalah HTML murni
+        // (href="#" + target="_top"): browser menyelesaikan "#" terhadap
+        // alamat halaman ini sendiri dan memuatnya di jendela paling atas,
+        // jadi halaman deploy jadi halaman utama — posisi di mana wallet
+        // Binance mau menyuntikkan provider-nya untuk jalur cadangan.
+        // Tanpa JS, tanpa membaca alamat. Jalur utama WalletConnect tidak
+        // membutuhkannya.
+
+        // Provider wallet sering disuntikkan beberapa detik SETELAH halaman
+        // tampil, jadi deteksi tidak pernah berhenti total: cek ulang tiap
+        // 2 detik dan setiap halaman kembali terlihat/fokus. Tombol
+        // Hubungkan juga tidak pernah dimatikan permanen.
+        detectProviders();
+        setInterval(detectProviders, 2000);
+        window.addEventListener("pageshow", detectProviders);
+        window.addEventListener("focus", detectProviders);
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden) detectProviders();
+        });
+        waitForProvider(15000).then(function (found) {
+          if (!found) {
+            $("detectStatus").textContent = inIframe()
+              ? "Sudah dicari 15 detik — tidak ada wallet tersuntik, dan memang tidak akan ada selama halaman ini di dalam bingkai. Pakai WalletConnect di Langkah 1 — itu jalur utamanya, bekerja dari browser mana pun."
+              : "Sudah dicari 15 detik — belum ada wallet tersuntik di halaman ini. Pakai WalletConnect di Langkah 1 — itu jalur utamanya, bekerja dari browser biasa.";
+            $("noWallet").classList.add("show");
+            updateDiag();
+          }
+        });
+      });
+    </script>
+
+    <!-- WalletConnect Ethereum Provider (jalur utama koneksi wallet),
+         build UMD dari CDN — diekspos sebagai global
+         window["@walletconnect/ethereum-provider"].EthereumProvider.
+         Project ID di script berikutnya adalah pengenal publik proyek
+         Reown Cloud "AgentWall" — aman tampil di halaman, bukan rahasia. -->
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.21.1/dist/index.umd.js" onerror="window.__awWcError && window.__awWcError(new Error('CDN WalletConnect gagal dimuat'))"></script>
+    <script>
+      (function () {
+        var ns = window["@walletconnect/ethereum-provider"];
+        var EP = ns && (ns.EthereumProvider || ns.default);
+        if (!EP || typeof EP.init !== "function") {
+          if (window.__awWcError) window.__awWcError(new Error("Library WalletConnect tidak tersedia"));
+          return;
+        }
+        EP.init({
+          projectId: "87234f45f6fb4841cde3666337f5f699",
+          chains: [56],
+          optionalChains: [56],
+          showQrModal: true,
+          metadata: {
+            name: "Deploy AgentWall",
+            description: "Deploy kontrak AgentWall ke BNB Smart Chain",
+            url: "https://muse.ai",
+            icons: []
+          },
+          rpcMap: { 56: "https://bsc-dataseed.binance.org" }
+        }).then(function (wcClient) {
+          window.__awSetWcProvider(wcClient);
+        }).catch(function (e) {
+          window.__awWcError(e);
+        });
+      })();
+    </script>
+  </body>
+</html>
